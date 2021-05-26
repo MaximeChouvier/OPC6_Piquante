@@ -5,8 +5,9 @@ exports.addSauce = (req, res, next) => {
   const sauceObject = JSON.parse(req.body.sauce)
   const newSauce = new Sauce({
     ...sauceObject,
-    imageUrl: `${req.protocol}://${req.get("host")}/Images/${req.file.filename}}`
+    imageUrl: `${req.protocol}://${req.get("host")}/Images/${req.file.filename}`
   });
+  console.log(newSauce)
   newSauce.save()
     .then(() => res.status(200).json({message: "Nouvelle sauce crée"}))
     .catch(error => res.status(400).json({error}));

@@ -20,9 +20,7 @@ app.use(bodyParser.json());
 // app.use(bodyParser.text());
 // app.use(bodyParser.urlencoded())
 
-
 app.use("/api/auth", userRoutes)
 app.use("/api/sauces", sauceRoutes)
 
 module.exports = app;
-

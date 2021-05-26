@@ -17,8 +17,10 @@ mongoose.connect('mongodb+srv://admin:admin@cluster0.db9o0.mongodb.net/myFirstDa
 
 app.use(cors())
 app.use(bodyParser.json());
-app.use(bodyParser.text());
-app.use(bodyParser.urlencoded())
+// app.use(bodyParser.text());
+// app.use(bodyParser.urlencoded())
+
+
 app.use("/api/auth", userRoutes)
 app.use("/api/sauces", sauceRoutes)
 

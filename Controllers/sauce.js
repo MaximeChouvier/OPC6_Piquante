@@ -64,3 +64,27 @@ exports.deleteSauce = (req, res ,next) => {
     })
     .catch(error => res.status(500).json({error}))
 };
+
+exports.likeSauce = (req, res ,next) => {
+let sauceObject = Sauce.findOne({_id: req.params})
+console.log(sauceObject)
+const sauceId = req.params;
+const userLiking = req.body.userId;
+const likeStatus = req.body.like;
+
+  if (likeStatus == 1) {
+    likeSauce(sauceId, userLiking)
+  } else if (likeStatus == -1) {
+    dislikeSauce(sauceId, userLiking)
+  }
+}
+
+function likeSauce(){
+
+console.log("Sauce liked")
+}
+
+function dislikeSauce(){
+
+  console.log("Sauce disliked")
+}

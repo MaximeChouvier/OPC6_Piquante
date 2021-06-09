@@ -1,12 +1,15 @@
 const Sauce = require('../Models/sauce.js')
 const bodyParser = require("body-parser");
 const fs = require("fs");
+const sauce = require('../Models/sauce.js');
 
 exports.addSauce = (req, res, next) => {
   const sauceObject = JSON.parse(req.body.sauce)
   const newSauce = new Sauce({
     ...sauceObject,
-    imageUrl: `${req.protocol}://${req.get("host")}/Images/${req.file.filename}`
+    imageUrl: `${req.protocol}://${req.get("host")}/Images/${req.file.filename}`,
+    likes: 0,
+    dislikes: 0
   });
   console.log(newSauce)
   newSauce.save()
@@ -52,7 +55,7 @@ exports.updateSauce = (req, res , next) => {
     .catch(error => res.status(400).json({ error }));
 };
 
-exports.deleteSauce = (req, res ,next) => {
+exports.deleteSauce = (req, res , next) => {
   Sauce.findOne({ _id: req.params.id})
     .then(Sauce => {
       const filename = Sauce.imageUrl.split("/Images/")[1];
@@ -66,25 +69,43 @@ exports.deleteSauce = (req, res ,next) => {
 };
 
 exports.likeSauce = (req, res ,next) => {
-let sauceObject = Sauce.findOne({_id: req.params})
-console.log(sauceObject)
-const sauceId = req.params;
-const userLiking = req.body.userId;
-const likeStatus = req.body.like;
-
-  if (likeStatus == 1) {
-    likeSauce(sauceId, userLiking)
-  } else if (likeStatus == -1) {
-    dislikeSauce(sauceId, userLiking)
-  }
+  const sauceId = req.params.id;
+  const userLiking = req.body.userId;
+  const likeStatus = req.body.like;
+  Sauce.findById(sauceId)
+    .then(result => {
+      let sauceObject = result;
+      if (likeStatus == 1) {
+        likeSauce(res, sauceId, sauceObject, userLiking)
+      } else if (likeStatus == -1) {
+        dislikeSauce(res, sauceObject, userLiking)
+      } else if (likeStatus == 0) {
+        unlikeSauce(res, likeStatus, sauceObject, userLiking)
+      }
+    })
+    .catch(error => res.status(400).json({error}))
 }
 
-function likeSauce(){
+async function likeSauce(res, sauceId, sauceObject, userLiking){
+  let update = await {likes: sauceObject.likes + 1};
+  console.log(update)
+  Sauce.findOneAndUpdate(sauceId, update)
+    .then(() => res.status(200).json())
+    .catch(error => res.status(400).json({ error }));
 
-console.log("Sauce liked")
 }
 
-function dislikeSauce(){
+function dislikeSauce(res, likeStatus, sauceObject, userLiking){
+  const update = { dislikes: 4 };  
+  Sauce.findOneAndUpdate(sauceId, update)
+    .then(() => res.status(200).json())
+    .catch(error => res.status(400).json({ error }));
 
   console.log("Sauce disliked")
+}
+
+function unlikeSauce(res, likeStatus, sauceObject, userLiking){
+
+
+  console.log("Sauce unliked")
 }

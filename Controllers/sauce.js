@@ -71,42 +71,42 @@ exports.deleteSauce = (req, res , next) => {
 
 exports.likeSauce = (req, res ,next) => {
   const sauceId = req.params.id;
-  const userLiking = req.body.userId;
+  const userRequest = req.body.userId;
   const likeStatus = req.body.like;
   Sauce.findById(sauceId)
     .then(result => {
       let sauceObject = result;
       const usersLiked = sauceObject.usersLiked;
       const usersDisliked = sauceObject.usersDisliked;
-      if (likeStatus == 1) {
-        likeSauce(res, sauceId, sauceObject, usersLiked, userLiking)
-      } else if (likeStatus == -1) {
-        dislikeSauce(res, sauceObject, userLiking)
+      
+      if (likeStatus == 1 && usersLiked !== userRequest) {
+        likeSauce(res, sauceId, sauceObject, usersLiked, userRequest)
+      } else if (likeStatus == -1 && usersDisliked !== userRequest) {
+        dislikeSauce(res, sauceId, sauceObject, usersDisliked, userRequest)
       } else if (likeStatus == 0) {
-        unlikeSauce(res, likeStatus, sauceObject, userLiking)
+        unlikeSauce(res, likeStatus, sauceObject, userRequest)
       }
     })
     .catch(error => res.status(400).json({error}))
 }
 
-async function likeSauce(res, sauceId, sauceObject, usersLiked, userLiking){
-  usersLiked.push(userLiking)
+async function likeSauce(res, sauceId, sauceObject, usersLiked, userRequest){
+  usersLiked.push(userRequest);
   let update = await {likes: sauceObject.likes + 1, usersLiked: usersLiked};
   Sauce.findOneAndUpdate(sauceId, update)
     .then(() => res.status(200).json())
     .catch(error => res.status(400).json({ error }));
 }
 
-function dislikeSauce(res, sauceId, sauceObject, userLiking){
-  const update = { dislikes: 4 };  
+async function dislikeSauce(res, sauceId, sauceObject, usersDisliked, userRequest){
+  usersDisliked.push(userRequest);
+  let update = await {dislikes: sauceObject.dislikes - 1, usersDisliked: usersDisliked}
   Sauce.findOneAndUpdate(sauceId, update)
-    .then(() => res.status(200).json())
-    .catch(error => res.status(400).json({ error }));
-
-  console.log("Sauce disliked")
+  .then(() => res.status(200).json())
+  .catch(error => res.status(400).json({ error }));
 }
 
-function unlikeSauce(res, likeStatus, sauceObject, userLiking){
+function unlikeSauce(res, likeStatus, sauceObject, userRequest){
 
 
   console.log("Sauce unliked")

@@ -71,43 +71,67 @@ exports.deleteSauce = (req, res , next) => {
 
 exports.likeSauce = (req, res ,next) => {
   const sauceId = req.params.id;
-  const userRequest = req.body.userId;
-  const likeStatus = req.body.like;
+  const userId = req.body.userId;
+  const userRequest = req.body.like;
+
   Sauce.findById(sauceId)
     .then(result => {
       let sauceObject = result;
       const usersLiked = sauceObject.usersLiked;
       const usersDisliked = sauceObject.usersDisliked;
       
-      if (likeStatus == 1 && usersLiked !== userRequest) {
-        likeSauce(res, sauceId, sauceObject, usersLiked, userRequest)
-      } else if (likeStatus == -1 && usersDisliked !== userRequest) {
-        dislikeSauce(res, sauceId, sauceObject, usersDisliked, userRequest)
-      } else if (likeStatus == 0) {
-        unlikeSauce(res, likeStatus, sauceObject, userRequest)
+      if (userRequest == 1 && usersLiked !== userId) {
+        likeSauce(res, sauceId, sauceObject, usersLiked, userId)
+      } else if (userRequest == -1 && usersDisliked !== userId) {
+        dislikeSauce(res, sauceId, sauceObject, usersDisliked, userId)
+      } else if (userRequest == 0) {
+        unlikeSauce(res, sauceId, sauceObject, usersLiked, usersDisliked, userId)
+      } else {
+        throw({error})
       }
     })
     .catch(error => res.status(400).json({error}))
 }
 
-async function likeSauce(res, sauceId, sauceObject, usersLiked, userRequest){
-  usersLiked.push(userRequest);
+async function likeSauce(res, sauceId, sauceObject, usersLiked, userId){
+  usersLiked.push(userId);
   let update = await {likes: sauceObject.likes + 1, usersLiked: usersLiked};
+  updateSauceLikes(res, sauceId, update);
+}
+
+async function dislikeSauce(res, sauceId, sauceObject, usersDisliked, userId){
+  usersDisliked.push(userId);
+  let update = await {dislikes: sauceObject.dislikes + 1, usersDisliked: usersDisliked}
+  updateSauceLikes(res, sauceId, update);
+}
+
+async function unlikeSauce(res, sauceId, sauceObject, usersLiked, usersDisliked, userId){
+  const didUserLiked = usersLiked.find(element => element == userId)
+  const didUserDisliked = usersDisliked.find(element => element == userId)
+
+  if (userId == didUserLiked){
+    unlikeLikedSauce(res, sauceId, sauceObject, usersLiked, userId);
+  } else if (userId == didUserDisliked){
+    undislikeDislikedSauce(res, sauceId, sauceObject, usersLiked, userId);
+  } else {
+    throw({error})
+  }
+}
+
+async function unlikeLikedSauce(res, sauceId, sauceObject, usersLiked, userId) {
+  usersLiked.splice(usersLiked.indexOf(userId))
+  let update = await {likes: sauceObject.likes - 1, usersLiked: usersLiked}
+  updateSauceLikes(res, sauceId, update);
+};
+
+async function undislikeDislikedSauce(res, sauceId, sauceObject, usersDisliked, userId){
+  usersDisliked.splice(usersDisliked.indexOf(userId))
+  let update = await {dislikes: sauceObject.dislikes - 1, usersDisliked: usersDisliked}
+  updateSauceLikes(res, sauceId, update);
+}
+
+function updateSauceLikes(res, sauceId, update){
   Sauce.findOneAndUpdate(sauceId, update)
     .then(() => res.status(200).json())
     .catch(error => res.status(400).json({ error }));
-}
-
-async function dislikeSauce(res, sauceId, sauceObject, usersDisliked, userRequest){
-  usersDisliked.push(userRequest);
-  let update = await {dislikes: sauceObject.dislikes - 1, usersDisliked: usersDisliked}
-  Sauce.findOneAndUpdate(sauceId, update)
-  .then(() => res.status(200).json())
-  .catch(error => res.status(400).json({ error }));
-}
-
-function unlikeSauce(res, likeStatus, sauceObject, userRequest){
-
-
-  console.log("Sauce unliked")
 }

@@ -71,6 +71,7 @@ exports.deleteSauce = (req, res , next) => {
 
 exports.likeSauce = (req, res ,next) => {
   const sauceId = req.params.id;
+  console.log("ID sauce actuel :", sauceId)
   const userId = req.body.userId;
   const userRequest = req.body.like;
 

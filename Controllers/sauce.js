@@ -71,7 +71,6 @@ exports.deleteSauce = (req, res , next) => {
 
 exports.likeSauce = (req, res ,next) => {
   const sauceId = req.params.id;
-  console.log("ID sauce actuel :", sauceId)
   var userId = req.body.userId;
   const userRequest = req.body.like;
 
@@ -132,7 +131,7 @@ async function undislikeDislikedSauce(res, sauceId, sauceObject, usersDisliked, 
 }
 
 function updateSauceLikes(res, sauceId, update){
-  Sauce.findOneAndUpdate(sauceId, update)
+  Sauce.findByIdAndUpdate(sauceId, update)
     .then(() => res.status(200).json())
     .catch(error => res.status(400).json({ error }));
 }

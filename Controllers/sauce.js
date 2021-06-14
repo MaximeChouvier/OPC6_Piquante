@@ -1,8 +1,10 @@
 const Sauce = require('../Models/sauce.js')
 const bodyParser = require("body-parser");
 const fs = require("fs");
-const sauce = require('../Models/sauce.js');
-const { update } = require('../Models/sauce.js');
+const mongoose = require("mongoose")
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+
 
 exports.addSauce = (req, res, next) => {
   const sauceObject = JSON.parse(req.body.sauce)
@@ -14,7 +16,6 @@ exports.addSauce = (req, res, next) => {
     usersLiked: [],
     usersDisliked: []
   });
-  console.log(newSauce)
   newSauce.save()
     .then(() => res.status(200).json({message: "Nouvelle sauce crée"}))
     .catch(error => res.status(400).json({error}));
@@ -30,19 +31,6 @@ exports.getOneSauce = (req, res, next) => {
   Sauce.findOne({ _id: req.params.id })
     .then(Sauce => res.status(200).json(Sauce))
     .catch(error => res.status(404).json({ error }));
-
-  // ↓ Pour supprimer la sauce séléctionnée en cas de soucis ↓
-  
-  // Sauce.findOne({ _id: req.params.id})
-  // .then(Sauce => {
-  //   const filename = Sauce.imageUrl.split("/Images/")[1];
-  //   fs.unlink(`Images/${filename}`,() => {
-  //     Sauce.deleteOne({ _id: req.params.id })
-  //     .then(() => res.status(200).json({message: "Sauce supprimée"}))
-  //     .catch(error => res.status(400).json({error}))
-  //   });
-  // })
-  // .catch(error => res.status(500).json({error}))
 }
 
 exports.updateSauce = (req, res , next) => {
@@ -80,9 +68,9 @@ exports.likeSauce = (req, res ,next) => {
       const usersLiked = sauceObject.usersLiked;
       const usersDisliked = sauceObject.usersDisliked;
       
-      if (userRequest == 1) {
+      if (userRequest == 1 && usersLiked.includes(userId) == false){
         likeSauce(res, sauceId, sauceObject, usersLiked, userId)
-      } else if (userRequest == -1) {
+      } else if (userRequest == -1 && usersDisliked.includes(userId) == false){
         dislikeSauce(res, sauceId, sauceObject, usersDisliked, userId)
       } else if (userRequest == 0) {
         unlikeSauce(res, sauceId, sauceObject, usersLiked, usersDisliked, userId)

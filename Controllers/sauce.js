@@ -72,7 +72,7 @@ exports.deleteSauce = (req, res , next) => {
 exports.likeSauce = (req, res ,next) => {
   const sauceId = req.params.id;
   console.log("ID sauce actuel :", sauceId)
-  const userId = req.body.userId;
+  var userId = req.body.userId;
   const userRequest = req.body.like;
 
   Sauce.findById(sauceId)
@@ -81,9 +81,9 @@ exports.likeSauce = (req, res ,next) => {
       const usersLiked = sauceObject.usersLiked;
       const usersDisliked = sauceObject.usersDisliked;
       
-      if (userRequest == 1 && usersLiked !== userId) {
+      if (userRequest == 1) {
         likeSauce(res, sauceId, sauceObject, usersLiked, userId)
-      } else if (userRequest == -1 && usersDisliked !== userId) {
+      } else if (userRequest == -1) {
         dislikeSauce(res, sauceId, sauceObject, usersDisliked, userId)
       } else if (userRequest == 0) {
         unlikeSauce(res, sauceId, sauceObject, usersLiked, usersDisliked, userId)
@@ -91,7 +91,7 @@ exports.likeSauce = (req, res ,next) => {
         throw({error})
       }
     })
-    .catch(error => res.status(400).json({error}))
+  .catch(error => res.status(400).json({error}))
 }
 
 async function likeSauce(res, sauceId, sauceObject, usersLiked, userId){

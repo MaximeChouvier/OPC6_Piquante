@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../Models/user")
+require('dotenv').config()
 
 
 exports.signup = (req, res, next) => {
@@ -12,7 +13,8 @@ exports.signup = (req, res, next) => {
       });
       newUser.save()
         .then(() => res.status(200).json({message: "Nouvel utilisateur crée !"}))
-        .catch(error => res.status(400).json({ error }));
+        .catch(error => console.log(error)) 
+        // .catch(error => res.status(401).json({ error }));
     })
     .catch(error => res.status(500).json({ error }));
 };
@@ -32,7 +34,7 @@ exports.login = (req, res, next) => {
           userId: user._id,
           token: jwt.sign(
             {userId: user._id},
-            "ST:CS4GFxn-v=`HC",
+            process.env.SECRET_Token,
             {expiresIn: "1h"}
           )
         });

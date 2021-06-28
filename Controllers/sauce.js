@@ -37,12 +37,20 @@ exports.updateSauce = (req, res , next) => {
   const sauceObject = req.file ?
     {
       ...JSON.parse(req.body.sauce),
-      imageUrl: `${req.protocol}://${req.get("host")}/Images/${req.file.filename}`
+      imageUrl: `${req.protocol}://${req.get("host")}/Images/${req.file.filename}`,
     } : {...req.body};
   Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
     .then(Sauce => res.status(200).json(Sauce))
     .catch(error => res.status(400).json({ error }));
 };
+
+// function deleteOldImage(){
+//   console.log({Sauce})
+//   const oldFilename = Sauce.imageUrl.split("/Images/")[1];
+//   fs.unlink(`Images/${oldFilename}`)
+//     .then(() => res.status(200).json({message: "l'ancienne image à été supprimée"}))
+//     .catch(error => res.status(400).json({error}))
+// }
 
 exports.deleteSauce = (req, res , next) => {
   Sauce.findOne({ _id: req.params.id})
@@ -81,19 +89,19 @@ exports.likeSauce = (req, res ,next) => {
   .catch(error => res.status(400).json({error}))
 }
 
-async function likeSauce(res, sauceId, sauceObject, usersLiked, userId){
+function likeSauce(res, sauceId, sauceObject, usersLiked, userId){
   usersLiked.push(userId);
-  let update = await {likes: sauceObject.likes + 1, usersLiked: usersLiked};
+  let update = {likes: sauceObject.likes + 1, usersLiked: usersLiked};
   updateSauceLikes(res, sauceId, update);
 }
 
-async function dislikeSauce(res, sauceId, sauceObject, usersDisliked, userId){
+function dislikeSauce(res, sauceId, sauceObject, usersDisliked, userId){
   usersDisliked.push(userId);
-  let update = await {dislikes: sauceObject.dislikes + 1, usersDisliked: usersDisliked}
+  let update = {dislikes: sauceObject.dislikes + 1, usersDisliked: usersDisliked}
   updateSauceLikes(res, sauceId, update);
 }
 
-async function unlikeSauce(res, sauceId, sauceObject, usersLiked, usersDisliked, userId){
+function unlikeSauce(res, sauceId, sauceObject, usersLiked, usersDisliked, userId){
   const didUserLiked = usersLiked.find(element => element == userId)
   const didUserDisliked = usersDisliked.find(element => element == userId)
 
@@ -106,15 +114,15 @@ async function unlikeSauce(res, sauceId, sauceObject, usersLiked, usersDisliked,
   }
 }
 
-async function unlikeLikedSauce(res, sauceId, sauceObject, usersLiked, userId) {
+function unlikeLikedSauce(res, sauceId, sauceObject, usersLiked, userId) {
   usersLiked.splice(usersLiked.indexOf(userId))
-  let update = await {likes: sauceObject.likes - 1, usersLiked: usersLiked}
+  let update = {likes: sauceObject.likes - 1, usersLiked: usersLiked}
   updateSauceLikes(res, sauceId, update);
 };
 
-async function undislikeDislikedSauce(res, sauceId, sauceObject, usersDisliked, userId){
+function undislikeDislikedSauce(res, sauceId, sauceObject, usersDisliked, userId){
   usersDisliked.splice(usersDisliked.indexOf(userId))
-  let update = await {dislikes: sauceObject.dislikes - 1, usersDisliked: usersDisliked}
+  let update = {dislikes: sauceObject.dislikes - 1, usersDisliked: usersDisliked}
   updateSauceLikes(res, sauceId, update);
 }
 
